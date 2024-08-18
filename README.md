@@ -8,12 +8,12 @@ This project is a reservations system designed to synchronize orders. It uses th
 - **Database**: Latest MySQL.
 - **Containerization**: Docker and Docker Compose.
 
-### Prerequisites
+## Prerequisites
 Ensure Docker and Docker Compose are installed. You can download and install them from the following links:
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Setup
+## Setup
 1. **Clone the Repository**
     ```bash
     git clone <repository-url>
@@ -35,26 +35,26 @@ Ensure Docker and Docker Compose are installed. You can download and install the
     docker compose exec php ./bin/console doctrine:migrations:migrate
     ```
 
-### Accessing the Project
+## Accessing the Project
 Once the project is running, you can access it at: [http://localhost](http://localhost)
 - **NOTE: There are not SSL Certificates, so the connection is insecure, accept and proceed**
 
-### Running Commands
+## Running Commands
 To synchronize all POS providers, execute the following command:
 ```bash
 docker compose exec php ./bin/console app:sync-all-pos --trace --env=prod
 ```
 - **--trace: Shows detailed activity of the task.**
 
-### Database Tables
+## Database Tables
 The application uses two primary tables:
 - **commands_logs**: This table logs all command executions, including their status and any relevant details.
 - **orders**: This table stores all the orders that have been synchronized from the POS providers.
 
-### API Endpoints
+## API Endpoints
 List Orders: Retrieve a paginated list of orders by accessing: [http://localhost/api/orders](http://localhost/api/orders)
 
-### Adding a New POS Provider
+## Adding a New POS Provider
 - **Create a New Provider Class**
 - **Define a new class in the src/Pos/Providers directory.**
 - **Ensure this class extends AbstractProvider.**

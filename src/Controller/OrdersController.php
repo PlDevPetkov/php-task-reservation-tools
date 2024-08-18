@@ -25,6 +25,10 @@ class OrdersController
      */
     private $orderRepository;
 
+    /**
+     * @param PaginatorInterface $paginator
+     * @param OrdersRepository $orderRepository
+     */
     public function __construct(PaginatorInterface $paginator, OrdersRepository $orderRepository)
     {
         $this->paginator = $paginator;

@@ -103,8 +103,16 @@ abstract class AbstractCommand extends Command
         return $result;
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int
+     */
     abstract protected function doExecute(InputInterface $input, OutputInterface $output): int;
 
+    /**
+     * @return void
+     */
     abstract protected function configureCommand(): void;
 
     /**
