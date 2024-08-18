@@ -20,5 +20,23 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    # START POS Providers 
+    App\Pos\Providers\Barsy:
+        arguments:
+            $config: '%barsy%'
+            $entityManager: '@doctrine.orm.entity_manager'
+
+    App\Pos\Providers\Rkeeper:
+        arguments:
+            $config: '%rkeeper%'
+            $entityManager: '@doctrine.orm.entity_manager'
+
+    App\Pos\PosFactory:
+        arguments:
+            $providers:
+                - '@App\Pos\Providers\Barsy'
+                - '@App\Pos\Providers\Rkeeper'
+    # END POS Providers
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

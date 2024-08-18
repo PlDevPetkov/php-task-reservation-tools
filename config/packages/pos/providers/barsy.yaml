@@ -1,0 +1,5 @@
+parameters:
+    barsy:
+        host: '%env(BARSY_HOST)%'
+        user: '%env(BARSY_USER)%'
+        password: '%env(BARSY_PASSWORD)%'

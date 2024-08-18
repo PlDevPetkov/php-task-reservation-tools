@@ -1,0 +1,3 @@
+imports:
+    - { resource: 'pos/providers/barsy.yaml' }
+    - { resource: 'pos/providers/rkeeper.yaml' }

@@ -1,0 +1,6 @@
+parameters:
+    rkeeper:
+        host: '%env(RKEEPER_HOST)%'
+        user: '%env(RKEEPER_USER)%'
+        password: '%env(RKEEPER_PASSWORD)%'
+        should_use_dummy_data: '%env(RKEEPER_SHOULD_USE_DUMMY_DATA)%'
