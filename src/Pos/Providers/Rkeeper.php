@@ -39,7 +39,7 @@ class Rkeeper extends AbstractProvider
                 $orderObj = new \stdClass();
                 $orderObj->provider_id = (int) $order['OrderID'];
                 $orderObj->reservation_id = $visitId;
-                $orderObj->attributes = json_encode($order->attributes());
+                $orderObj->attributes = $order->attributes();
 
                 $mappedOrders[] = $orderObj;
             }

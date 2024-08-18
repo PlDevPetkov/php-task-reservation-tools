@@ -20,7 +20,16 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    # START POS Providers 
+    # START Controllers
+    App\Controller\OrdersController:
+        arguments:
+            $paginator: '@knp_paginator'
+            $orderRepository: '@App\Repository\OrdersRepository'
+        tags:
+            - { name: 'controller.service_arguments' }
+    # END Controllers
+
+    # START POS Providers
     App\Pos\Providers\Barsy:
         arguments:
             $config: '%barsy%'
