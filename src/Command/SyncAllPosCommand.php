@@ -67,16 +67,16 @@ class SyncAllPosCommand extends AbstractCommand
      */
     protected function doExecute(InputInterface $input, OutputInterface $output): int
     {
-        $lastExecutedCommandFinishedAt = null;
+        $lastExecutedCommandStaredAt = null;
         $lastExecutedCommand = $this->getLastExecutedCommand();
 
         if ($lastExecutedCommand) {
-            $lastExecutedCommandFinishedAt = $lastExecutedCommand->getFinishedAt();
+            $lastExecutedCommandStaredAt = $lastExecutedCommand->getStartedAt();
         }
 
         try {
             foreach ($this->posFactory->getProviders() as $provider) {
-                $syncedOrdersCount = $provider->synchronizeOrders($lastExecutedCommandFinishedAt);
+                $syncedOrdersCount = $provider->synchronizeOrders($lastExecutedCommandStaredAt);
                 $this->trace(sprintf(
                     'Synchronized %d orders from %s',
                     $syncedOrdersCount,

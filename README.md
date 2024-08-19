@@ -55,9 +55,8 @@ The application uses two primary tables:
 List Orders: Retrieve a paginated list of orders by accessing: [http://localhost/api/orders](http://localhost/api/orders)
 
 ## Adding a New POS Provider
-- **Create a New Provider Class**
 - **Define a new class in the src/Pos/Providers directory.**
 - **Ensure this class extends AbstractProvider.**
-- **Implement the retrieveOrders() method to return an array of objects containing provider_id and reservation_id.**
-- **Update config/services.yaml to register the new provider.**
-- **Ensure the new provider is added to the $providers array in App\Pos\PosFactory.**
+- **Implement the getName() method to return unique provider name and retrieveOrders() method to return an array of objects containing provider_id and reservation_id.**
+- **Update config/services.yaml to register the new provider in section POS Providers.**
+- **Ensure the new provider is added to the $providers array in App\Pos\PosFactory dependencies.**

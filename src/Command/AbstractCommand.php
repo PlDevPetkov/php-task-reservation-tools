@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @class  BaseCommand
+ * @class  AbstractCommand
  * @package App\Command
  */
 abstract class AbstractCommand extends Command
@@ -66,13 +66,13 @@ abstract class AbstractCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $commandName = $this->getName();
         $this->output = $output;
         $this->trace = $input->getOption('trace');
         $this->lastExecutedCommand = $this->entityManager
             ->getRepository(CommandsLogs::class)
-            ->findOneBy([], ['id' => 'DESC']);
+            ->findOneBy(['name' => $commandName], ['id' => 'DESC']);
 
-        $commandName = $this->getName();
         $startTime = new \DateTime();
         $this->trace("Command $commandName execution started");
         $this->trace(sprintf("Start time: %s", $startTime->format('Y-m-d H:i:s')));
