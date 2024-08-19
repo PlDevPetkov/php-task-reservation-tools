@@ -1,6 +1,6 @@
 # Reservations System
 
-This project is a reservations system designed to synchronize orders. It uses the latest Symfony framework and latest MySQL. The project is containerized with Docker.
+This project is a reservations system designed to synchronize orders. It uses the latest Symfony framework and latest MySQL. The project is containerized with Docker. The main part of the logic is stored in Command. On the first trigger, the Command will synchronize all orders and every other trigger will get the newly created orders from the last Command invoke. 
 
 ## Project Overview
 - **Purpose**: Synchronize and manage reservations orders.
