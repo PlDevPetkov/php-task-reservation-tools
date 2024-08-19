@@ -16,8 +16,8 @@ Ensure Docker and Docker Compose are installed. You can download and install the
 ## Setup
 1. **Clone the Repository**
     ```bash
-    git clone <repository-url>
-    cd <repository-directory>
+    git clone https://github.com/PlDevPetkov/php-task-reservation-tools.git
+    cd php-task-reservation-tools
     ```
 
 2. **Copy Environment File**
