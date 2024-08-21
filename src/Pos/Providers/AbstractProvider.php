@@ -52,10 +52,10 @@ abstract class AbstractProvider implements PosInterface
             $orderModel->setUpdatedAt(new DateTime());
 
             $this->entityManager->persist($orderModel);
-            $this->entityManager->flush();
 
             $syncedOrdersCount++;
         }
+        $this->entityManager->flush();
 
         return $syncedOrdersCount;
     }

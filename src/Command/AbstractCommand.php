@@ -18,22 +18,27 @@ abstract class AbstractCommand extends Command
     /**
      * @var EntityManagerInterface
      */
-    private $entityManager;
+    protected $entityManager;
+
+    /**
+     * @var InputInterface
+     */
+    protected $input;
+
+    /**
+     * @var OutputInterface
+     */
+    protected $output;
+
+    /**
+     * @var CommandsLogs|null
+     */
+    protected $lastExecutedCommand;
 
     /**
      * @var bool
      */
     private $trace;
-
-    /**
-     * @var OutputInterface
-     */
-    private $output;
-
-    /**
-     * @var CommandsLogs|null
-     */
-    private $lastExecutedCommand;
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -67,6 +72,7 @@ abstract class AbstractCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $commandName = $this->getName();
+        $this->input = $input;
         $this->output = $output;
         $this->trace = $input->getOption('trace');
         $this->lastExecutedCommand = $this->entityManager
@@ -104,22 +110,10 @@ abstract class AbstractCommand extends Command
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
-     */
-    abstract protected function doExecute(InputInterface $input, OutputInterface $output): int;
-
-    /**
-     * @return void
-     */
-    abstract protected function configureCommand(): void;
-
-    /**
      * @param string $message
      * @return void
      */
-    public function trace(string $message)
+    protected function trace(string $message)
     {
         if ($this->trace) {
             $this->output->writeln($message);
@@ -127,10 +121,12 @@ abstract class AbstractCommand extends Command
     }
 
     /**
-     * @return CommandsLogs|null
+     * @return int
      */
-    public function getLastExecutedCommand()
-    {
-        return $this->lastExecutedCommand;
-    }
+    abstract protected function doExecute(): int;
+
+    /**
+     * @return void
+     */
+    abstract protected function configureCommand(): void;
 }

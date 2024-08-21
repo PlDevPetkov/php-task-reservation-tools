@@ -2,6 +2,10 @@
 
 namespace App\Pos\Providers;
 
+use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+
 /**
  * @class Rkeeper
  * @package App\Pos\Providers
@@ -25,7 +29,7 @@ class Rkeeper extends AbstractProvider
      */
     protected function retrieveOrders($fromDate): array
     {
-        $xmlResult = $this->config['should_use_dummy_data']
+        $xmlResult = (bool) $this->config['should_use_dummy_data']
             ? $this->getDummyData()
             : $this->retrieveXmlRequest($fromDate);
 
@@ -52,44 +56,38 @@ class Rkeeper extends AbstractProvider
      * @param \DateTime|null $fromDate
      * @return string
      * @throws \Exception
+     * @throws ClientExceptionInterface|TransportExceptionInterface
      */
-    private function retrieveXmlRequest($fromDate)
+    private function retrieveXmlRequest($fromDate): string
     {
-        // TODO: Implement proper filtering
-        $xml = sprintf('
-<?xml version="1.0" encoding="windows-1251"?>
-<RK7Query>
- <RK7Command CMD="GetOrderList" ><Visit><Orders><Order createTime="%s"></Order></Orders></Visit></RK7Command>
-</RK7Query>
-', $fromDate->format('Y-m-d H:i:s'));
+        $xml = sprintf(
+            '<?xml version="1.0" encoding="windows-1251"?><RK7Query><RK7Command CMD="GetOrderList" ><Visit><Orders><Order createTime="%s"></Order></Orders></Visit></RK7Command></RK7Query>',
+            $fromDate->format('Y-m-d H:i:s')
+        );
 
-        $host = $this->config['host'];
-        $user = $this->config['user'];
-        $password = $this->config['password'];
+        $httpClient = HttpClient::create([
+            'auth_basic' => [
+                $this->config['user'],
+                $this->config['password']
+            ]
+        ]);
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $host);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For self-signed certificates
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: text/xml'));
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $xml);
-        curl_setopt($ch, CURLOPT_USERPWD, "$user:$password");
+        $response = $httpClient->request('POST', $this->config['host'], [
+            'headers' => ['Content-Type' => 'text/xml'],
+            'body' => $xml,
+        ]);
 
-        $response = (string) curl_exec($ch);
-
-        if (curl_errno($ch)) {
-            throw new \Exception('Curl error: ' . curl_error($ch));
+        if ($response->getStatusCode() !== 200) {
+            throw new \Exception('Request failed with status: ' . $response->getStatusCode());
         }
 
-        if (empty($response)) {
+        $responseContent = $response->getContent();
+
+        if (empty($responseContent)) {
             throw new \Exception('Empty response');
         }
 
-        curl_close($ch);
-
-        return $response;
+        return $responseContent;
     }
 
     /**

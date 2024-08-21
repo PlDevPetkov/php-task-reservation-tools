@@ -6,30 +6,11 @@ use App\Pos\PosFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
-const COMMAND_NAME = 'app:sync-all-pos';
-
-#[AsCommand(name: COMMAND_NAME)]
+#[AsCommand(name: 'app:sync-all-pos')]
 class SyncAllPosCommand extends AbstractCommand
 {
-    /**
-     * @var string
-     */
-    protected static $defaultName = COMMAND_NAME;
-
-    /**
-     * @var array
-     */
-    private $params;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
     /**
      * @var PosFactory
      */
@@ -44,12 +25,10 @@ class SyncAllPosCommand extends AbstractCommand
         ParameterBagInterface $params,
         EntityManagerInterface $entityManager,
         PosFactory $posFactory
-
-    ) {
-        $this->params = $params;
-        $this->entityManager = $entityManager;
-        $this->posFactory = $posFactory;
+    )
+    {
         parent::__construct($entityManager);
+        $this->posFactory = $posFactory;
     }
 
     /**
@@ -61,17 +40,13 @@ class SyncAllPosCommand extends AbstractCommand
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
      * @return int
      */
-    protected function doExecute(InputInterface $input, OutputInterface $output): int
+    protected function doExecute(): int
     {
         $lastExecutedCommandStaredAt = null;
-        $lastExecutedCommand = $this->getLastExecutedCommand();
-
-        if ($lastExecutedCommand) {
-            $lastExecutedCommandStaredAt = $lastExecutedCommand->getStartedAt();
+        if ($this->lastExecutedCommand) {
+            $lastExecutedCommandStaredAt = $this->lastExecutedCommand->getStartedAt();
         }
 
         try {
@@ -84,7 +59,7 @@ class SyncAllPosCommand extends AbstractCommand
                 ));
             }
         } catch (\Exception $e) {
-            $output->writeln($e->getMessage());
+            $this->output->writeln($e->getMessage());
             return Command::FAILURE;
         }
 

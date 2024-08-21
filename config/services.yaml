@@ -34,17 +34,19 @@ services:
         arguments:
             $config: '%barsy%'
             $entityManager: '@doctrine.orm.entity_manager'
+        tags:
+            - { name: 'pos.provider' }
 
     App\Pos\Providers\Rkeeper:
         arguments:
             $config: '%rkeeper%'
             $entityManager: '@doctrine.orm.entity_manager'
+        tags:
+            - { name: 'pos.provider' }
 
     App\Pos\PosFactory:
         arguments:
-            $providers:
-                - '@App\Pos\Providers\Barsy'
-                - '@App\Pos\Providers\Rkeeper'
+            $providers: !tagged pos.provider
     # END POS Providers
 
     # add more service definitions when explicit configuration is needed
