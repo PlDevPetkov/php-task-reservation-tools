@@ -76,4 +76,4 @@ In order to create and test Integration tests, follow these steps:
 
 ## Improvements
 - **Automate reservations_test DB creation from Docker**
-- **asd**
+- **Add additional Unit and Integration tests for Pos namespace**
