@@ -23,7 +23,7 @@ Ensure Docker and Docker Compose are installed. You can download and install the
 2. **Copy Environment File**
    Copy `.env.dev` to `.env` and replace the `REPLACE` placeholders with actual values
     ```bash
-    cp .env.dev .env
+    cp .env.example .env.dev
     ```
 
 3. **Build and Start the Containers**
@@ -42,7 +42,7 @@ Once the project is running, you can access it at: [http://localhost](http://loc
 ## Running Commands
 To synchronize all POS providers, execute the following command:
 ```bash
-docker compose exec php ./bin/console app:sync-all-pos --trace --env=prod
+docker compose exec php ./bin/console app:sync-all-pos --trace --env=dev
 ```
 - **--trace: Shows detailed activity of the task.**
 
@@ -60,3 +60,20 @@ List Orders: Retrieve a paginated list of orders by accessing: [http://localhost
 - **Implement the getName() method to return unique provider name and retrieveOrders() method to return an array of objects containing provider_id and reservation_id.**
 - **Update config/services.yaml to register the new provider in section POS Providers.**
 - **Ensure the new provider is added to the $providers array in App\Pos\PosFactory dependencies.**
+
+## Unit and Integration Testing
+To run the tests, execute the following command:
+```bash
+docker compose exec php ./bin/phpunit
+```
+Tests structure is as follows:
+- **Unit Tests -> tests/Unit**
+- **Integration Tests -> tests/Integration**
+
+In order to create and test Integration tests, follow these steps:
+- **Create reservations_test DB by hand and grant "user" all privileges**
+- **Create reservations_test DB by hand**
+
+## Improvements
+- **Automate reservations_test DB creation from Docker**
+- **asd**

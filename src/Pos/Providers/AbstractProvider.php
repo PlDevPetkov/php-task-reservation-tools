@@ -3,8 +3,10 @@
 namespace App\Pos\Providers;
 
 use App\Entity\Orders;
+use App\Pos\Order;
 use Doctrine\ORM\EntityManagerInterface;
 use DateTime;
+use Symfony\Component\Serializer\SerializerInterface;
 
 /**
  * @class AbstractProvider
@@ -12,10 +14,7 @@ use DateTime;
  */
 abstract class AbstractProvider implements PosInterface
 {
-    /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
+    const ORDERS_BATCH_SIZE = 100;
 
     /**
      * @var array
@@ -23,13 +22,25 @@ abstract class AbstractProvider implements PosInterface
     protected $config;
 
     /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    /**
+     * @var SerializerInterface
+     */
+    protected $serializer;
+
+    /**
      * @param array $config
      * @param EntityManagerInterface $entityManager
+     * @param SerializerInterface $serializer
      */
-    public function __construct(array $config, EntityManagerInterface $entityManager)
+    public function __construct(array $config, EntityManagerInterface $entityManager, SerializerInterface $serializer)
     {
         $this->config = $config;
         $this->entityManager = $entityManager;
+        $this->serializer = $serializer;
     }
 
     /**
@@ -42,22 +53,35 @@ abstract class AbstractProvider implements PosInterface
         $orders = $this->retrieveOrders($fromDate);
         $syncedOrdersCount = 0;
 
-        foreach ($orders as $order) {
+        foreach ($orders as $index => $order) {
             $orderModel = new Orders();
-            $orderModel->setProviderId($order->provider_id);
             $orderModel->setProviderName($this->getName());
-            $orderModel->setReservationId($order->reservation_id);
-            $orderModel->setReservationDetails(json_encode($order));
+            $orderModel->setProviderId($order->getProviderId());
+            $orderModel->setReservationId($order->getReservationId());
+            $orderModel->setReservationDetails($this->serializer->serialize($order, 'json'));
             $orderModel->setCreatedAt(new DateTime());
             $orderModel->setUpdatedAt(new DateTime());
 
             $this->entityManager->persist($orderModel);
-
             $syncedOrdersCount++;
+
+            if (($index + 1) % self::ORDERS_BATCH_SIZE === 0) {
+                $this->flushAndClear();
+            }
         }
-        $this->entityManager->flush();
+
+        $this->flushAndClear();
 
         return $syncedOrdersCount;
+    }
+
+    /**
+     * @return void
+     */
+    private function flushAndClear(): void
+    {
+        $this->entityManager->flush();
+        $this->entityManager->clear();
     }
 
     /**
@@ -67,7 +91,7 @@ abstract class AbstractProvider implements PosInterface
 
     /**
      * @param DateTime|null $fromDate
-     * @return array
+     * @return Order[]
      * @throws \Exception
      */
     abstract protected function retrieveOrders($fromDate): array;

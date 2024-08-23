@@ -62,13 +62,15 @@ class OrdersController
             ];
         }
 
+        $totalItems = $pagination->getTotalItemCount();
+
         $result = [
             'items' => $mappedItems,
             'meta' => [
                 'total' => $pagination->getTotalItemCount(),
                 'page' => $pagination->getCurrentPageNumber(),
                 'limit' => $pagination->getItemNumberPerPage(),
-                'pages' => $pagination->getPageCount(),
+                'pages' => (int) ceil($totalItems / $limit)
             ]
         ];
 

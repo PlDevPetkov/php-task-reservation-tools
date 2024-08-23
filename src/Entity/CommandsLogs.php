@@ -29,6 +29,12 @@ class CommandsLogs
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $parameters = null;
 
+    #[ORM\Column(type: Types::TEXT)]
+    private ?string $result = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $context = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -42,6 +48,18 @@ class CommandsLogs
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getContext(): ?string
+    {
+        return $this->context;
+    }
+
+    public function setContext(?string $context): static
+    {
+        $this->context = $context;
 
         return $this;
     }
@@ -90,6 +108,18 @@ class CommandsLogs
     public function setParameters(?string $parameters): static
     {
         $this->parameters = $parameters;
+
+        return $this;
+    }
+
+    public function getResult(): ?string
+    {
+        return $this->result;
+    }
+
+    public function setResult(string $result): static
+    {
+        $this->result = $result;
 
         return $this;
     }

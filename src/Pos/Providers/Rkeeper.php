@@ -2,6 +2,7 @@
 
 namespace App\Pos\Providers;
 
+use App\Pos\Order;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
@@ -24,8 +25,8 @@ class Rkeeper extends AbstractProvider
 
     /**
      * @param \DateTime|null $fromDate
-     * @return array
-     * @throws \Exception
+     * @return Order[]
+     * @throws \Exception|TransportExceptionInterface
      */
     protected function retrieveOrders($fromDate): array
     {
@@ -34,16 +35,16 @@ class Rkeeper extends AbstractProvider
             : $this->retrieveXmlRequest($fromDate);
 
         $orders = new \SimpleXMLElement($xmlResult);
-        $mappedOrders = [];
 
+        $mappedOrders = [];
         foreach ($orders->Visit as $visit) {
             $visitId = (int) $visit->attributes()->VisitID;
 
             foreach ($visit->Orders->Order as $order) {
-                $orderObj = new \stdClass();
-                $orderObj->provider_id = (int) $order['OrderID'];
-                $orderObj->reservation_id = $visitId;
-                $orderObj->attributes = $order->attributes();
+                $orderObj = (new Order())
+                    ->setProviderId((int) $order['OrderID'])
+                    ->setReservationId($visitId)
+                    ->setOrderDetails($order->attributes());
 
                 $mappedOrders[] = $orderObj;
             }

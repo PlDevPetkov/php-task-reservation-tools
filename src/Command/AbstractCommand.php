@@ -21,24 +21,24 @@ abstract class AbstractCommand extends Command
     protected $entityManager;
 
     /**
-     * @var InputInterface
-     */
-    protected $input;
-
-    /**
      * @var OutputInterface
      */
     protected $output;
 
     /**
-     * @var CommandsLogs|null
-     */
-    protected $lastExecutedCommand;
-
-    /**
      * @var bool
      */
-    private $trace;
+    protected $trace;
+
+    /**
+     * @var string|null
+     */
+    private $context;
+
+    /**
+     * @var string
+     */
+    private $result = '';
 
     /**
      * @param EntityManagerInterface $entityManager
@@ -72,30 +72,20 @@ abstract class AbstractCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $commandName = $this->getName();
-        $this->input = $input;
         $this->output = $output;
         $this->trace = $input->getOption('trace');
-        $this->lastExecutedCommand = $this->entityManager
-            ->getRepository(CommandsLogs::class)
-            ->findOneBy(['name' => $commandName], ['id' => 'DESC']);
 
         $startTime = new \DateTime();
-        $this->trace("Command $commandName execution started");
-        $this->trace(sprintf("Start time: %s", $startTime->format('Y-m-d H:i:s')));
-
-        $result = $this->doExecute($input, $output);
-
+        $commandResult = $this->doExecute($input, $output);
         $endTime = new \DateTime();
-        $this->trace(sprintf("End time: %s", $endTime->format('Y-m-d H:i:s')));
-
-        $duration = $endTime->getTimestamp() - $startTime->getTimestamp();
-        $this->trace(sprintf("Duration: %s", $duration));
 
         $commandsLog = new CommandsLogs();
         $commandsLog->setName($commandName);
+        $commandsLog->setContext($this->context);
         $commandsLog->setStartedAt($startTime);
         $commandsLog->setFinishedAt($endTime);
-        $commandsLog->setStatus($result);
+        $commandsLog->setStatus($commandResult);
+        $commandsLog->setResult($this->result);
 
         $arguments = $input->getArguments();
         if (array_key_exists('command', $arguments)) {
@@ -106,14 +96,31 @@ abstract class AbstractCommand extends Command
         $this->entityManager->persist($commandsLog);
         $this->entityManager->flush();
 
-        return $result;
+        return $commandResult;
+    }
+
+    /**
+     * @return CommandsLogs|object|null
+     */
+    protected function retrieveLastSuccessCommand()
+    {
+        return $this->entityManager
+            ->getRepository(CommandsLogs::class)
+            ->findOneBy(
+                [
+                    'name' => $this->getName(),
+                    'context' => $this->context,
+                    'status' => Command::SUCCESS
+                ],
+                ['id' => 'DESC']
+            );
     }
 
     /**
      * @param string $message
      * @return void
      */
-    protected function trace(string $message)
+    protected function log(string $message)
     {
         if ($this->trace) {
             $this->output->writeln($message);
@@ -121,9 +128,29 @@ abstract class AbstractCommand extends Command
     }
 
     /**
+     * @param array $result
+     * @return void
+     */
+    protected function setResult(array $result)
+    {
+        $this->result = json_encode($result);
+    }
+
+    /**
+     * @param string $context
+     * @return void
+     */
+    protected function setContext(string $context)
+    {
+        $this->context = $context;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
      * @return int
      */
-    abstract protected function doExecute(): int;
+    abstract protected function doExecute(InputInterface $input, OutputInterface $output): int;
 
     /**
      * @return void

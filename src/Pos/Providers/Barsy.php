@@ -2,6 +2,7 @@
 
 namespace App\Pos\Providers;
 
+use App\Pos\Order;
 use Lukanet\BarsyApiClient\BarsyApiClient;
 use Lukanet\BarsyApiClient\BarsyApiData;
 use Lukanet\BarsyApiClient\Exceptions as LukanetExceptions;
@@ -26,7 +27,7 @@ class Barsy extends AbstractProvider
 
     /**
      * @param \DateTime|null $fromDate
-     * @return array
+     * @return Order[]
      * @throws LukanetExceptions\BarsyApiClientFault
      * @throws LukanetExceptions\BarsyApiClientMessage
      */
@@ -39,17 +40,24 @@ class Barsy extends AbstractProvider
         );
 
         $filters = BarsyApiData::factory(ReservationsListFiltersData::class);
+        $order_by = '';
         if ($fromDate) {
             $filters->create_date = [$fromDate->format('Y-m-d H:i:s')];
         }
 
         $reservationsModel = new Reservations($bapi);
-        $reservations = $reservationsModel->getlist($filters, [], 0, 10000, '');
+        $reservations = $reservationsModel->getlist($filters, [], 0, 10000, $order_by);
 
+        $mappedReservations = [];
         foreach ($reservations as $reservation) {
-            $reservation->provider_id = $reservation->barsy_id;
+            $orderObj = (new Order())
+                ->setProviderId($reservation->barsy_id)
+                ->setReservationId($reservation->reservation_id)
+                ->setOrderDetails($reservation);
+
+            $mappedReservations[] = $orderObj;
         }
 
-        return $reservations;
+        return $mappedReservations;
     }
 }
